@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arslan Creates – Performance Tracker</title>
+<style>
+:root{--bg:#ffffff;--surface:#f5f7fb;--text:#111827;--muted:#6b7280;--primary:#184CA0;--accent:#FAEC1B;--border:#e5e7eb;--ok:#15803d}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f1115;--surface:#181b22;--text:#f3f4f6;--muted:#9ca3af;--primary:#5b8be0;--border:#2a2e38;--ok:#4ade80}}
+:root[data-theme="dark"]{--bg:#0f1115;--surface:#181b22;--text:#f3f4f6;--muted:#9ca3af;--primary:#5b8be0;--border:#2a2e38;--ok:#4ade80}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);padding:env(safe-area-inset-top,0px) 16px env(safe-area-inset-bottom,0px)}
+main{max-width:860px;margin:0 auto;padding:16px 0 40px}
+h1{font-size:1.4rem;margin:8px 0 4px}
+h2{font-size:1.05rem;margin:0 0 12px}
+.sub{color:var(--muted);font-size:.9rem;margin-bottom:16px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.wide{grid-column:1/-1}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.muted{color:var(--muted);font-size:.85rem}
+.ctr{display:flex;align-items:center;gap:8px}
+.ctr span{min-width:52px;text-align:center;font-weight:600}
+.done{color:var(--ok)}
+button{font:inherit;background:var(--primary);color:#fff;border:0;border-radius:8px;padding:6px 12px;cursor:pointer}
+button.ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+button:disabled{opacity:.5;cursor:default}
+input,select{font:inherit;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:8px;width:100%}
+.fields{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:12px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.item:last-child{border-bottom:0}
+.actions{display:flex;gap:8px;align-items:center}
+.actions select{width:auto}
+.bar{height:12px;background:var(--border);border-radius:999px;overflow:hidden;margin:10px 0}
+.bar>div{height:100%;background:var(--accent);transition:width .3s}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:12px}
+.stat{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px}
+.stat b{display:block;font-size:1.2rem}
+.tag{display:inline-block;background:var(--border);border-radius:999px;padding:2px 8px;font-size:.75rem;margin-left:6px}
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#184CA0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+<main>
+  <h1>Arslan Creates – Performance Tracker</h1>
+  <div class="sub" id="today"></div>
+
+  <div class="grid">
+    <section class="card" id="goalCard">
+      <h2>Monthly income goal</h2>
+      <div class="fields"><input type="number" id="goal" min="0" step="1000" aria-label="Monthly goal"></div>
+      <div class="bar"><div id="goalBar" style="width:0%"></div></div>
+      <div class="muted" id="goalText"></div>
+    </section>
+
+    <section class="card" id="weekCard">
+      <h2>Last 7 days</h2>
+      <div class="stats" id="week"></div>
+    </section>
+
+    <section class="card wide">
+      <h2>Today's activity</h2>
+      <div id="daily"></div>
+    </section>
+
+    <section class="card wide">
+      <h2>Lead pipeline</h2>
+      <div class="fields">
+        <input id="leadName" placeholder="Client or business name" aria-label="Lead name">
+        <select id="leadSource" aria-label="Source">
+          <option>Past Fiverr client</option>
+          <option>Local business</option>
+          <option>LinkedIn</option>
+          <option>Upwork</option>
+          <option>Instagram / Facebook</option>
+          <option>Referral</option>
+          <option>Other</option>
+        </select>
+        <input type="date" id="leadNext" aria-label="Next follow-up">
+        <button data-act="addLead">Add lead</button>
+      </div>
+      <div id="stageSummary" class="muted" style="margin-bottom:8px"></div>
+      <div id="leads"></div>
+    </section>
+
+    <section class="card wide">
+      <h2>Income log</h2>
+      <div class="fields">
+        <input type="date" id="incDate" aria-label="Date">
+        <input id="incClient" placeholder="Client or project" aria-label="Client">
+        <input type="number" id="incAmount" min="0" placeholder="Amount" aria-label="Amount">
+        <select id="incType" aria-label="Type">
+          <option>One-off project</option>
+          <option>Retainer</option>
+          <option>Job salary</option>
+        </select>
+        <button data-act="addIncome">Add income</button>
+      </div>
+      <div id="income"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const KEY = 'arslan-tracker-v1';
+const TARGETS = {
+  outreach:  {label:'Outreach messages',         target:10},
+  apps:      {label:'Job / Upwork applications', target:5},
+  posts:     {label:'Social posts',              target:1},
+  local:     {label:'Local business contacts',   target:1},
+  followups: {label:'Lead follow-ups done',      target:null}
+};
+const STAGES = ['Contacted','Replied','Quoted','Paid','Lost'];
+let state = {goal:75000, days:{}, leads:[], income:[]};
+let memoryOnly = false;
+
+function load(){
+  try{
+    const s = localStorage.getItem(KEY);
+    if(s) state = Object.assign(state, JSON.parse(s));
+  }catch(e){ memoryOnly = true; }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ memoryOnly = true; }
+  render();
+}
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function fmt(n){ return 'PKR ' + Number(n||0).toLocaleString('en-US'); }
+function dateKey(d = new Date()){
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function today(){ return dateKey(); }
+function emptyDay(){ return {outreach:0, apps:0, posts:0, local:0, followups:0}; }
+function day(k){ return state.days[k] || (state.days[k] = emptyDay()); }
+
+function renderToday(){
+  document.getElementById('today').textContent =
+    new Date().toLocaleDateString('en-GB',{weekday:'long', day:'numeric', month:'long', year:'numeric'}) +
+    (memoryOnly ? ' · Storage unavailable: data will not persist after closing' : '');
+}
+
+function renderDaily(){
+  const d = day(today());
+  document.getElementById('daily').innerHTML = Object.keys(TARGETS).map(k => {
+    const t = TARGETS[k], v = d[k] || 0;
+    const hit = t.target && v >= t.target;
+    return `<div class="row">
+      <div><strong>${t.label}</strong><div class="muted">${t.target ? 'Target ' + t.target : 'Count every follow-up you sent'}</div></div>
+      <div class="ctr">
+        <button class="ghost" data-act="bump" data-k="${k}" data-n="-1" aria-label="Decrease ${t.label}">−</button>
+        <span class="${hit ? 'done' : ''}">${v}${t.target ? ' / ' + t.target : ''}</span>
+        <button data-act="bump" data-k="${k}" data-n="1" aria-label="Increase ${t.label}">+</button>
+      </div></div>`;
+  }).join('');
+}
+
+function renderWeek(){
+  const keys = [];
+  for(let i = 0; i < 7; i++){
+    const d = new Date(); d.setDate(d.getDate() - i); keys.push(dateKey(d));
+  }
+  const sum = {outreach:0, apps:0, posts:0, local:0, followups:0};
+  keys.forEach(k => { const d = state.days[k]; if(d) for(const x in sum) sum[x] += d[x] || 0; });
+  const weekIncome = state.income
+    .filter(x => keys.includes(x.date))
+    .reduce((a, x) => a + Number(x.amount || 0), 0);
+  const labels = {outreach:'Outreach', apps:'Applications', posts:'Posts', local:'Local contacts', followups:'Follow-ups'};
+  document.getElementById('week').innerHTML =
+    Object.keys(sum).map(k => `<div class="stat"><span class="muted">${labels[k]}</span><b>${sum[k]}</b></div>`).join('') +
+    `<div class="stat"><span class="muted">Income this week</span><b>${fmt(weekIncome)}</b></div>`;
+}
+
+function renderGoal(){
+  const m = today().slice(0,7);
+  const total = state.income
+    .filter(x => x.date && x.date.startsWith(m))
+    .reduce((a, x) => a + Number(x.amount || 0), 0);
+  const goal = Number(state.goal) || 0;
+  const pct = goal ? Math.min(100, Math.round(total / goal * 100)) : 0;
+  document.getElementById('goal').value = goal;
+  document.getElementById('goalBar').style.width = pct + '%';
+  const left = Math.max(0, goal - total);
+  document.getElementById('goalText').textContent =
+    `${fmt(total)} earned this month · ${pct}% of goal · ${fmt(left)} to go`;
+}
+
+function renderLeads(){
+  const counts = STAGES.map(s => `${s}: ${state.leads.filter(l => l.stage === s).length}`).join('  ·  ');
+  document.getElementById('stageSummary').textContent = counts;
+  const todayK = today();
+  document.getElementById('leads').innerHTML = state.leads.length ? state.leads.map((l, i) => {
+    const due = l.next && l.next <= todayK && !['Paid','Lost'].includes(l.stage);
+    return `<div class="item">
+      <div><strong>${esc(l.name)}</strong><span class="tag">${esc(l.source)}</span>
+        <div class="muted">Follow up: ${esc(l.next || 'not set')}${due ? ' <span class="done">· due</span>' : ''}</div></div>
+      <div class="actions">
+        <select data-act="stage" data-i="${i}" aria-label="Stage for ${esc(l.name)}">
+          ${STAGES.map(s => `<option ${s === l.stage ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+        <button class="ghost" data-act="delLead" data-i="${i}">Remove</button>
+      </div></div>`;
+  }).join('') : '<p class="muted">No leads yet. Add your first past client or local business above.</p>';
+}
+
+function renderIncome(){
+  const list = [...state.income].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  document.getElementById('income').innerHTML = list.length ? list.map((x) => {
+    const i = state.income.indexOf(x);
+    return `<div class="item">
+      <div><strong>${esc(x.client)}</strong><span class="tag">${esc(x.type)}</span>
+        <div class="muted">${esc(x.date)} · ${fmt(x.amount)}</div></div>
+      <button class="ghost" data-act="delIncome" data-i="${i}">Remove</button></div>`;
+  }).join('') : '<p class="muted">No income logged yet.</p>';
+}
+
+function render(){
+  renderToday(); renderDaily(); renderWeek(); renderGoal(); renderLeads(); renderIncome();
+}
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if(!el) return;
+  const act = el.dataset.act;
+  if(act === 'bump'){
+    const d = day(today());
+    const k = el.dataset.k;
+    d[k] = Math.max(0, (d[k] || 0) + Number(el.dataset.n));
+    save();
+  }
+  if(act === 'addLead'){
+    const name = document.getElementById('leadName').value.trim();
+    if(!name) return;
+    state.leads.push({
+      name,
+      source: document.getElementById('leadSource').value,
+      next: document.getElementById('leadNext').value,
+      stage: 'Contacted'
+    });
+    document.getElementById('leadName').value = '';
+    document.getElementById('leadNext').value = '';
+    save();
+  }
+  if(act === 'delLead'){
+    if(confirm('Remove this lead?')){ state.leads.splice(Number(el.dataset.i), 1); save(); }
+  }
+  if(act === 'addIncome'){
+    const amount = Number(document.getElementById('incAmount').value);
+    const client = document.getElementById('incClient').value.trim();
+    const date = document.getElementById('incDate').value || today();
+    if(!amount || !client) return;
+    state.income.push({
+      date, client, amount,
+      type: document.getElementById('incType').value
+    });
+    document.getElementById('incAmount').value = '';
+    document.getElementById('incClient').value = '';
+    save();
+  }
+  if(act === 'delIncome'){
+    if(confirm('Remove this income entry?')){ state.income.splice(Number(el.dataset.i), 1); save(); }
+  }
+});
+
+document.addEventListener('change', e => {
+  const el = e.target;
+  if(el.dataset.act === 'stage'){
+    state.leads[Number(el.dataset.i)].stage = el.value;
+    save();
+  }
+  if(el.id === 'goal'){
+    state.goal = Number(el.value) || 0;
+    save();
+  }
+});
+
+document.getElementById('incDate').value = today();
+load();
+render();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+</body>
+</html>
